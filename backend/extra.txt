@@ -1,0 +1,44 @@
+purana complaint.js
+
+import express from "express";
+import authMiddleware from "../middleware/authMiddleware.js";
+import Complaint from "../models/Complaint.js";
+import multer from "multer";
+
+const router = express.Router();
+
+// Multer setup for image upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
+});
+const upload = multer({ storage });
+
+// Create complaint
+router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
+  try {
+    const { issueType, description, address, latitude, longitude, priority } = req.body;
+
+    if (!issueType || !description) {
+      return res.status(400).json({ msg: "Issue type and description are required" });
+    }
+
+    const complaint = new Complaint({
+      issueType,
+      description,
+      address: address || undefined,
+      location: (latitude && longitude) ? { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] } : undefined,
+      image: req.file ? req.file.path : undefined,
+      priority: priority || "medium",
+      user: req.user.id,
+    });
+
+    await complaint.save();
+    res.json({ msg: "Complaint submitted successfully ✅", complaint });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+export default router;

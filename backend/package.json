@@ -1,0 +1,32 @@
+{
+  "name": "civic-auth",
+  "version": "1.0.0",
+  "description": "Civic issue reporting webapp authentication system",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+
+  },
+  "keywords": [
+    "express",
+    "jwt",
+    "mongodb",
+    "auth",
+    "civic"
+  ],
+  "author": "Ecosathi",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.8.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+    
+  }
+}
