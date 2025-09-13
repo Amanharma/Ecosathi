@@ -18,6 +18,10 @@ connectDB();
 // ✅ Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173'], // Vite default port is 5173
+  credentials: true
+}));
 
 // ✅ Health check route
 app.get("/", (req, res) => {
