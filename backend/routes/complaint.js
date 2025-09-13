@@ -1,3 +1,4 @@
+// routes/complaint.js
 import express from "express";
 import multer from "multer";
 import fs from "fs";
@@ -13,30 +14,24 @@ const upload = multer({ dest: "uploads/" });
 // ---------------- CREATE COMPLAINT ----------------
 router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   try {
-    const { issueType, description, address, longitude, latitude, priority } =
-      req.body;
+    const { issueType, description, address, longitude, latitude, priority } = req.body;
 
     // ✅ Validation
     if (!issueType || !description) {
-      return res
-        .status(400)
-        .json({ msg: "issueType and description are required" });
+      return res.status(400).json({ msg: "issueType and description are required" });
     }
 
-    // ✅ Handle location if provided (undefined instead of null)
-    let location = undefined;
+    // ✅ Handle location properly
+    let location;
     if (longitude && latitude) {
       const lon = parseFloat(longitude);
       const lat = parseFloat(latitude);
       if (!isNaN(lon) && !isNaN(lat)) {
-        location = {
-          type: "Point",
-          coordinates: [lon, lat],
-        };
+        location = { type: "Point", coordinates: [lon, lat] };
       }
     }
 
-    // ✅ Handle image upload with proper error handling and cleanup
+    // ✅ Handle image upload
     let imageUrl = null;
     if (req.file) {
       try {
@@ -45,31 +40,26 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
           resource_type: "auto",
         });
         imageUrl = result.secure_url;
-
-        // ✅ Clean up temporary file after successful upload
-        fs.unlinkSync(req.file.path);
       } catch (uploadError) {
         console.error("❌ Cloudinary upload error:", uploadError);
-
-        // ✅ Clean up temporary file even if upload fails
+        console.log("⚠️ Continuing complaint creation without image");
+      } finally {
+        // Always cleanup file if it exists
         if (fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
         }
-
-        // Continue without image rather than failing completely
-        console.log("⚠️ Continuing complaint creation without image");
       }
     }
 
-    // ✅ Create complaint with all fields
+    // ✅ Create complaint
     const complaint = new Complaint({
-      user: req.user.id,
+      user: req.user.id, // from authMiddleware
       issueType,
       description,
-      address: address || undefined, // ✅ Handle optional address
+      address: address || undefined,
       location,
       image: imageUrl,
-      priority: priority || "medium", // ✅ Handle priority with default
+      priority: priority || "medium",
     });
 
     await complaint.save();
@@ -81,7 +71,7 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   } catch (error) {
     console.error("❌ Complaint creation error:", error);
 
-    // ✅ Clean up temporary file if error occurs
+    // ✅ Cleanup temp file if error occurs
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
