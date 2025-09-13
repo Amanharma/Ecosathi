@@ -3,6 +3,13 @@ import { Play } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import dashboardImage from '@assets/generated_images/download.png';
+// Replace this line:
+// import dashboardImage from '@assets/generated_images/download.png';
+
+// With a placeholder or use a public image:
+ // or create the actual image
+
+// Or use a data URL placeholder:
 
 export default function HeroSection() {
   const [, setLocation] = useLocation();

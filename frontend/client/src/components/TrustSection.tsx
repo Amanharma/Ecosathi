@@ -1,4 +1,8 @@
-import clientLogos from '@assets/generated_images/downloadT.png';
+// Replace:
+// import clientLogos from '@assets/generated_images/downloadT.png';
+
+// With:
+const clientLogos = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzMzNzNkYyIgb3BhY2l0eT0iMC4xIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNsaWVudCBMb2dvczwvdGV4dD4KPC9zdmc+';
 
 export default function TrustSection() {
   // Mock client data for display
