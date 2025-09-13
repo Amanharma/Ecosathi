@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
-import dashboardImage from '@assets/generated_images/AI_Dashboard_Mockup_96ba70a8.png';
+import dashboardImage from '@assets/generated_images/download.png';
 
 export default function HeroSection() {
   const [, setLocation] = useLocation();
