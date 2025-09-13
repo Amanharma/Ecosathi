@@ -35,6 +35,7 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
     let imageUrl = null;
     if (req.file) {
       try {
+        console.log('File path received by Multer:', req.file.path);
         const result = await cloudinary.uploader.upload(req.file.path, {
           folder: "complaints",
           resource_type: "auto",
