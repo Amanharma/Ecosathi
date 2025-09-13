@@ -8,9 +8,8 @@
         min-height: 100vh;
         margin: 0;
         padding: 0;
-        background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 50%, #81d4fa 100%);
-      }
-      
+background: linear-gradient(135deg, #2563eb, #06b6d4); 
+}     
   :root {
     --background: transparent; /* Since we'll use gradient instead */
     --foreground: 222.2 84% 4.9%;
