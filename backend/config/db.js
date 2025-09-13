@@ -2,11 +2,10 @@ import mongoose from "mongoose";
 
 async function connectDB() {
   try {
-    await mongoose.connect("mongodb://127.0.0.1:27017/civic-auth", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("✅ MongoDB connected successfully");
+    const mongoURI =
+      "mongodb+srv://Shashwat:shashwat1234567890@cluster0.lglnalp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+    await mongoose.connect(mongoURI);
+    console.log("✅ MongoDB Atlas connected successfully");
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error);
     process.exit(1);
