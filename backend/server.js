@@ -1,10 +1,12 @@
-import express from "express";
+
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import express from "express";
 import authRoutes from "./routes/auth.js";
 import complaintRoutes from "./routes/complaint.js";
 
 dotenv.config(); // Load env variables early
+console.log(process.env.JWT_SECRET); // Ensure env variables are loaded
 
 const app = express();
 const PORT = process.env.PORT || 5000;
