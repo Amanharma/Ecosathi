@@ -1,4 +1,3 @@
-// routes/auth.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -6,88 +5,82 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// ✅ Register
+// ---------------- REGISTER ----------------
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, walletAddress } = req.body;
+    const { name, email, password } = req.body;
 
-    // check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    if (!name || !email || !password) {
+      return res.status(400).json({ msg: "All fields are required" });
+    }
+
+    let user = await User.findOne({ email });
+    if (user) {
       return res.status(400).json({ msg: "User already exists" });
     }
 
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // determine role based on email
+    // Auto-assign role
     let role = "user";
     if (email.endsWith("@Eco.com")) role = "admin";
-    else if (email.endsWith("@dev.com")) role = "superadmin";
+    if (email.endsWith("@dev.com")) role = "superadmin";
 
-    // create new user
-    const user = new User({
+    // ✅ Hash password properly
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user = new User({
       name,
       email,
       password: hashedPassword,
-      walletAddress: walletAddress || null,
-      tokens: 100,
-      rewards: 0,
-      role, // set role dynamically
+      role
     });
 
     await user.save();
 
-    // generate JWT
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    const { password: _, ...userData } = user.toObject();
-
     res.status(201).json({
-      msg: "User registered successfully",
-      token,
-      user: userData,
+      msg: "User registered successfully ✅",
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
-    console.error("Register error:", error.message);
+    console.error("❌ Register error:", error);
     res.status(500).json({ msg: "Server error", error: error.message });
   }
 });
 
-// ✅ Login
+// ---------------- LOGIN ----------------
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ msg: "Email and password are required" });
+    }
 
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
+    // ✅ Compare password safely
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
+    // ✅ Create JWT token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
-    const { password: _, ...userData } = user.toObject();
-
-    res.status(200).json({
-      msg: "Login successful",
+    res.json({
+      msg: "Login successful ✅",
       token,
-      user: userData,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
-    console.error("Login error:", error.message);
+    console.error("❌ Login error:", error);
     res.status(500).json({ msg: "Server error", error: error.message });
   }
 });
