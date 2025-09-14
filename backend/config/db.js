@@ -1,13 +1,13 @@
+// backend/config/db.js
 import mongoose from "mongoose";
 
 async function connectDB() {
   try {
-    const mongoURI =
-      "mongodb+srv://Shashwat:shashwat1234567890@cluster0.lglnalp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-    await mongoose.connect(mongoURI);
-    console.log("✅ MongoDB Atlas connected successfully");
+    const mongoURI = process.env.MONGO_URI; // ✅ pick from .env
+    const conn = await mongoose.connect(mongoURI);
+    console.log(`✅ MongoDB connected: ${conn.connection.name}`);
   } catch (error) {
-    console.error("❌ MongoDB connection failed:", error);
+    console.error("❌ MongoDB connection failed:", error.message);
     process.exit(1);
   }
 }

@@ -1,14 +1,12 @@
-// routes/complaint.js
 import express from "express";
 import multer from "multer";
 import fs from "fs";
 import Complaint from "../models/Complaint.js";
+import User from "../models/User.js";
 import { cloudinary } from "../utils/cloudinary.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
-// Multer for temporary uploads
 const upload = multer({ dest: "uploads/" });
 
 // ---------------- CREATE COMPLAINT ----------------
@@ -16,12 +14,10 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     const { issueType, description, address, longitude, latitude, priority } = req.body;
 
-    // ✅ Validation
     if (!issueType || !description) {
       return res.status(400).json({ msg: "issueType and description are required" });
     }
 
-    // ✅ Handle location properly
     let location;
     if (longitude && latitude) {
       const lon = parseFloat(longitude);
@@ -31,11 +27,9 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
       }
     }
 
-    // ✅ Handle image upload
     let imageUrl = null;
     if (req.file) {
       try {
-        console.log('File path received by Multer:', req.file.path);
         const result = await cloudinary.uploader.upload(req.file.path, {
           folder: "complaints",
           resource_type: "auto",
@@ -43,18 +37,13 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
         imageUrl = result.secure_url;
       } catch (uploadError) {
         console.error("❌ Cloudinary upload error:", uploadError);
-        console.log("⚠️ Continuing complaint creation without image");
       } finally {
-        // Always cleanup file if it exists
-        if (fs.existsSync(req.file.path)) {
-          fs.unlinkSync(req.file.path);
-        }
+        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
       }
     }
 
-    // ✅ Create complaint
     const complaint = new Complaint({
-      user: req.user.id, // from authMiddleware
+      user: req.user.id,
       issueType,
       description,
       address: address || undefined,
@@ -64,19 +53,86 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
     });
 
     await complaint.save();
-
-    res.status(201).json({
-      msg: "Complaint registered successfully ✅",
-      complaint,
-    });
+    res.status(201).json({ msg: "Complaint registered successfully ✅", complaint });
   } catch (error) {
     console.error("❌ Complaint creation error:", error);
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).json({ msg: "Server error", error: error.message });
+  }
+});
 
-    // ✅ Cleanup temp file if error occurs
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+// ---------------- GET MY COMPLAINTS ----------------
+router.get("/my", authMiddleware, async (req, res) => {
+  try {
+    const { issueType, status, priority } = req.query;
+    const filter = { user: req.user.id };
+    if (issueType) filter.issueType = issueType;
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+
+    const complaints = await Complaint.find(filter).sort({ createdAt: -1 });
+    res.status(200).json({ msg: "Your complaints", complaints });
+  } catch (error) {
+    console.error("❌ Get my complaints error:", error);
+    res.status(500).json({ msg: "Server error", error: error.message });
+  }
+});
+
+// ---------------- GET COMPLAINTS FOR ADMIN/SUPERADMIN ----------------
+router.get("/all", authMiddleware, async (req, res) => {
+  try {
+    const { issueType, status, priority } = req.query;
+    const user = await User.findById(req.user.id);
+
+    let filter = {};
+    if (user.role === "user") {
+      // Users see only their own complaints
+      filter.user = req.user.id;
+    } else if (user.role === "admin") {
+      // Admins see only complaints for their assigned issueType
+      if (!user.assignedIssueType) return res.status(400).json({ msg: "Admin has no assigned issueType" });
+      filter.issueType = user.assignedIssueType;
+    }
+    // Superadmin sees everything; filter empty means all
+
+    if (issueType) filter.issueType = issueType;
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+
+    const complaints = await Complaint.find(filter).sort({ createdAt: -1 });
+
+    res.status(200).json({ msg: "Filtered complaints based on role", complaints });
+  } catch (error) {
+    console.error("❌ Get complaints error:", error);
+    res.status(500).json({ msg: "Server error", error: error.message });
+  }
+});
+
+// ---------------- GET ADMIN ASSIGNMENTS (SUPERADMIN VIEW) ----------------
+router.get("/admin-assignments", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (user.role !== "superadmin") {
+      return res.status(403).json({ msg: "Access denied: superadmin only" });
     }
 
+    // Get all admins and their assigned issues
+    const admins = await User.find({ role: "admin" });
+    const assignments = [];
+
+    for (const admin of admins) {
+      const adminComplaints = await Complaint.find({ issueType: admin.assignedIssueType });
+      assignments.push({
+        adminId: admin._id,
+        email: admin.email,
+        assignedIssue: admin.assignedIssueType,
+        complaints: adminComplaints,
+      });
+    }
+
+    res.status(200).json({ msg: "Superadmin view: admin assignments", assignments });
+  } catch (error) {
+    console.error("❌ Get admin assignments error:", error);
     res.status(500).json({ msg: "Server error", error: error.message });
   }
 });
