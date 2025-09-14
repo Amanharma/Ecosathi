@@ -8,14 +8,17 @@ const authMiddleware = (req, res, next) => {
         console.log('Received Header:', authHeader);
         
         if (!authHeader) {
-            // ... (rest of your code)
-            return next();
+            return res.status(401).json({ msg: "No token, authorization denied" });
         }
 
         const token = authHeader.split(" ")[1];
         
         // ✅ And this line to see the token after the split
         console.log('Token to Verify:', token);
+
+        if (!token) {
+            return res.status(401).json({ msg: "No token, authorization denied" });
+        }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;

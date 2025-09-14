@@ -2,12 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
-import dashboardImage from '@assets/generated_images/download.png';
-// Replace this line:
-// import dashboardImage from '@assets/generated_images/download.png';
-
-// With a placeholder or use a public image:
- // or create the actual image
+// Use a data URL placeholder for the dashboard image
+const dashboardImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzYzNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRhc2hib2FyZCBJbWFnZTwvdGV4dD4KPC9zdmc+';
 
 // Or use a data URL placeholder:
 
@@ -43,17 +39,17 @@ export default function HeroSection() {
               <br />
               Complaint Revolution
             </h1>
-            
+
             <p className="text-xl text-cyan-100 mb-4 font-medium">
               Blockchain Transparency Meets AI Intelligence
             </p>
-            
+
             <p className="text-lg text-white/80 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Transform complaint management with cutting-edge AI classification, 
-              intelligent routing, and immutable blockchain tracking for unprecedented 
+              Transform complaint management with cutting-edge AI classification,
+              intelligent routing, and immutable blockchain tracking for unprecedented
               transparency and efficiency.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button
                 size="lg"
@@ -81,12 +77,12 @@ export default function HeroSection() {
             <div className="relative">
               {/* Glassmorphism container */}
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-2xl max-w-md w-full">
-                <img 
-                  src={dashboardImage} 
-                  alt="AI Dashboard Mockup" 
+                <img
+                  src={dashboardImage}
+                  alt="AI Dashboard Mockup"
                   className="w-full h-auto rounded-lg"
                 />
-                
+
                 {/* Stats overlay */}
                 <div className="grid grid-cols-3 gap-3 mt-6">
                   <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">

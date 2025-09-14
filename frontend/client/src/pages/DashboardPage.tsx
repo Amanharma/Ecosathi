@@ -2,19 +2,41 @@ import { useAuth, Complaint } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain, FileText, Clock, CheckCircle, AlertTriangle, User, LogOut, Plus } from 'lucide-react';
+import { Brain, FileText, Clock, CheckCircle, AlertTriangle, User, LogOut, Plus, RefreshCw } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
+import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
-  const { user, logout, getUserComplaints } = useAuth();
+  const { user, logout, getUserComplaints, refreshComplaints } = useAuth();
   const [, setLocation] = useLocation();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Get user's complaints from the auth context
   const complaints = getUserComplaints();
 
+  // Refresh complaints when dashboard loads
+  useEffect(() => {
+    if (user) {
+      console.log('Dashboard loaded for user:', user.email);
+      // Optionally refresh complaints on page load
+      handleRefresh();
+    }
+  }, [user]);
+
   const handleLogout = () => {
     logout();
     setLocation('/');
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshComplaints();
+    } catch (error) {
+      console.error('Error refreshing complaints:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -110,6 +132,14 @@ export default function DashboardPage() {
           <p className="text-xl text-cyan-200 mb-6">
             Manage your complaints and track their progress with AI-powered insights.
           </p>
+          {/* Show user role if available */}
+          {user?.role && user.role !== 'user' && (
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
+              <span className="text-blue-300 text-sm font-medium">
+                Role: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Quick stats */}
@@ -158,22 +188,41 @@ export default function DashboardPage() {
         {/* Complaints section */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-white">Your Complaints</h2>
-          <Link href="/#complaint-form">
-            <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
-              <Plus className="w-4 h-4 mr-2" />
-              New Complaint
+          <div className="flex items-center space-x-3">
+            {/* Refresh button */}
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="text-white border-white/30 hover:bg-white/10"
+              data-testid="button-refresh"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
-          </Link>
+            {/* New Complaint button - Fixed the link */}
+            <Link href="/complaint">
+              <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
+                <Plus className="w-4 h-4 mr-2" />
+                New Complaint
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6">
           {complaints.map((complaint) => (
-            <Card key={complaint.id} className="bg-white/10 backdrop-blur-lg border-white/20 shadow-lg hover-elevate">
+            <Card key={complaint.id || complaint._id} className="bg-white/10 backdrop-blur-lg border-white/20 shadow-lg hover-elevate">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="space-y-1">
-                  <CardTitle className="text-white">{complaint.title}</CardTitle>
+                  <CardTitle className="text-white">
+                    {complaint.title || complaint.issueType || 'Complaint'}
+                  </CardTitle>
                   <CardDescription className="text-cyan-200">
-                    ID: {complaint.id} • Created {formatDate(complaint.createdAt)}
+                    ID: {complaint.id || complaint._id} • Created {formatDate(complaint.createdAt)}
+                    {/* Show issue type if available */}
+                    {complaint.issueType && (
+                      <> • {complaint.issueType}</>
+                    )}
                   </CardDescription>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -188,6 +237,20 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-white/80 mb-4">{complaint.description}</p>
+                {/* Show address if available */}
+                {complaint.address && (
+                  <p className="text-cyan-200/80 text-sm mb-2">📍 {complaint.address}</p>
+                )}
+                {/* Show image if available */}
+                {complaint.image && (
+                  <div className="mb-4">
+                    <img 
+                      src={complaint.image} 
+                      alt="Complaint image" 
+                      className="w-full max-w-sm h-32 object-cover rounded-lg border border-white/20"
+                    />
+                  </div>
+                )}
                 <div className="flex justify-between items-center text-sm text-cyan-200">
                   <span>Last updated: {formatDate(complaint.updatedAt)}</span>
                   <Button variant="outline" size="sm" className="text-cyan-300 border-cyan-300/30 hover:bg-cyan-300/10">
@@ -204,7 +267,8 @@ export default function DashboardPage() {
             <FileText className="w-16 h-16 text-white/40 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No complaints yet</h3>
             <p className="text-cyan-200 mb-6">Submit your first complaint to get started with AI-powered resolution.</p>
-            <Link href="/#complaint-form">
+            {/* Fixed the link here too */}
+            <Link href="/complaint">
               <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
                 <Plus className="w-4 h-4 mr-2" />
                 Submit Your First Complaint

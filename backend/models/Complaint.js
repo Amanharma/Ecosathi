@@ -19,4 +19,5 @@ const complaintSchema = new mongoose.Schema(
 );
 
 // ✅ Force collection name = "complaints"
-export default mongoose.model("Complaint", complaintSchema, "complaints");
+const Complaint = mongoose.models.Complaint || mongoose.model("Complaint", complaintSchema, "complaints");
+export default Complaint;

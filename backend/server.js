@@ -9,7 +9,7 @@ import cors from "cors";
 console.log(process.env.JWT_SECRET); // Ensure env variables are loaded
 
 const app = express();
-const PORT = 5001;
+const PORT = 5000;
 
 // ✅ Connect Database first
 connectDB();
@@ -19,8 +19,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"], // Vite default port is 5173
+    origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:4173"], // Vite default ports
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 

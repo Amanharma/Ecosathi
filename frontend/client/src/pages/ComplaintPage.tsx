@@ -6,6 +6,18 @@ import { Sparkles, CheckCircle, Upload, X, AlertTriangle, ArrowLeft } from 'luci
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 
+const issueTypes = [
+  'Road Maintenance',
+  'Street Lighting', 
+  'Water Supply',
+  'Waste Management',
+  'Public Transport',
+  'Noise Complaint',
+  'Environmental Issues',
+  'Public Safety',
+  'Other'
+];
+
 export default function ComplaintPage() {
   const { user, isAuthenticated, submitComplaint } = useAuth();
   const [, setLocation] = useLocation();
@@ -14,6 +26,7 @@ export default function ComplaintPage() {
     email: '',
     description: ''
   });
+  const [selectedIssueType, setSelectedIssueType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -97,10 +110,17 @@ export default function ComplaintPage() {
         name: formData.name,
         email: formData.email,
         description: formData.description,
-        images: uploadedImages // Include uploaded images
+        issueType: selectedIssueType || undefined,
+        address: '', // You can add address field to your form if needed
+        priority: 'medium', // Default priority
+        images: uploadedImages,
+        userInfo: !isAuthenticated ? {
+          fullName: formData.name,
+          email: formData.email
+        } : undefined
       });
       
-      setComplaintId(submittedComplaint.id);
+      setComplaintId(submittedComplaint.id || submittedComplaint._id);
       setIsSubmitted(true);
       setShowNotification(true);
       
@@ -209,6 +229,7 @@ export default function ComplaintPage() {
                 setIsSubmitted(false);
                 setFormData({ name: user?.fullName || '', email: user?.email || '', description: '' });
                 setUploadedImages([]);
+                setSelectedIssueType('');
               }}
               variant="outline"
               className="text-white border-white/30 hover:bg-white/10"
@@ -313,6 +334,28 @@ export default function ComplaintPage() {
               {errors.email && (
                 <p className="text-red-400 text-sm mt-1">{errors.email}</p>
               )}
+            </div>
+
+            {/* Issue Type field */}
+            <div>
+              <label htmlFor="issueType" className="block text-sm font-medium text-white mb-2">
+                Issue Type (Optional)
+              </label>
+              <select
+                id="issueType"
+                value={selectedIssueType}
+                onChange={(e) => setSelectedIssueType(e.target.value)}
+                className="w-full px-3 py-2 bg-white/10 border border-white/30 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400"
+                data-testid="select-complaint-issue-type"
+              >
+                <option value="" className="bg-gray-800">Auto-detect from description</option>
+                {issueTypes.map(type => (
+                  <option key={type} value={type} className="bg-gray-800">{type}</option>
+                ))}
+              </select>
+              <p className="text-cyan-200/80 text-sm mt-1">
+                If not selected, we'll automatically detect the issue type from your description
+              </p>
             </div>
 
             {/* Description field */}

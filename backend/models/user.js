@@ -11,5 +11,5 @@ const userSchema = new mongoose.Schema({
   assignedIssue: { type: String, default: null } // Admin ke liye issueType
 }, { timestamps: true });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 export default User;
