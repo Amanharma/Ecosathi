@@ -1,41 +1,43 @@
 import dotenv from "dotenv";
 dotenv.config();
-import connectDB from "./config/db.js";
+
 import express from "express";
+import cors from "cors";
+import connectDB from "./config/db.js";
+
 import authRoutes from "./routes/auth.js";
 import complaintRoutes from "./routes/complaint.js";
-import cors from "cors";
-//dotenv.config(); // Load env variables early
-console.log(process.env.JWT_SECRET); // Ensure env variables are loaded
+import taskRoutes from "./routes/task.js";
+import adminRoutes from "./routes/admin.js";
 
 const app = express();
-const PORT = 5000;
 
-// ✅ Connect Database first
+// ✅ Connect DB
 connectDB();
 
-// ✅ Middleware
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "http://localhost:5173", "http://localhost:4173"], // Vite default ports
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:5173"],
+  credentials: true
+}));
 
-// ✅ Health check route
-app.get("/", (req, res) => {
-  res.send("🚀 Civic-Auth API is running...");
-});
+// Health check
+app.get("/", (req, res) => res.send("🚀 Civic-Auth API running..."));
 
-// ✅ Routes
+// Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/admin", adminRoutes);
 
-// ✅ Start Server
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ msg: "Server error", error: err.message });
 });
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));

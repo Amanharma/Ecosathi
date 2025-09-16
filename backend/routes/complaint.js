@@ -13,27 +13,19 @@ const upload = multer({ dest: "uploads/" });
 router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     const { issueType, description, address, longitude, latitude, priority } = req.body;
-
-    if (!issueType || !description) {
-      return res.status(400).json({ msg: "issueType and description are required" });
-    }
+    if (!issueType || !description) return res.status(400).json({ msg: "issueType and description are required" });
 
     let location;
     if (longitude && latitude) {
       const lon = parseFloat(longitude);
       const lat = parseFloat(latitude);
-      if (!isNaN(lon) && !isNaN(lat)) {
-        location = { type: "Point", coordinates: [lon, lat] };
-      }
+      if (!isNaN(lon) && !isNaN(lat)) location = { type: "Point", coordinates: [lon, lat] };
     }
 
     let imageUrl = null;
     if (req.file) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-          folder: "complaints",
-          resource_type: "auto",
-        });
+        const result = await cloudinary.uploader.upload(req.file.path, { folder: "complaints", resource_type: "auto" });
         imageUrl = result.secure_url;
       } catch (uploadError) {
         console.error("❌ Cloudinary upload error:", uploadError);
@@ -49,7 +41,7 @@ router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
       address: address || undefined,
       location,
       image: imageUrl,
-      priority: priority || "medium",
+      priority: priority || "medium"
     });
 
     await complaint.save();
@@ -85,22 +77,17 @@ router.get("/all", authMiddleware, async (req, res) => {
     const user = await User.findById(req.user.id);
 
     let filter = {};
-    if (user.role === "user") {
-      // Users see only their own complaints
-      filter.user = req.user.id;
-    } else if (user.role === "admin") {
-      // Admins see only complaints for their assigned issueType
-      if (!user.assignedIssueType) return res.status(400).json({ msg: "Admin has no assigned issueType" });
-      filter.issueType = user.assignedIssueType;
+    if (user.role === "user") filter.user = req.user.id;
+    else if (user.role === "admin") {
+      if (!user.assignedIssue) return res.status(400).json({ msg: "Admin has no assigned issue" });
+      filter.issueType = user.assignedIssue;
     }
-    // Superadmin sees everything; filter empty means all
 
     if (issueType) filter.issueType = issueType;
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
 
     const complaints = await Complaint.find(filter).sort({ createdAt: -1 });
-
     res.status(200).json({ msg: "Filtered complaints based on role", complaints });
   } catch (error) {
     console.error("❌ Get complaints error:", error);
@@ -112,21 +99,17 @@ router.get("/all", authMiddleware, async (req, res) => {
 router.get("/admin-assignments", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    if (user.role !== "superadmin") {
-      return res.status(403).json({ msg: "Access denied: superadmin only" });
-    }
+    if (user.role !== "superadmin") return res.status(403).json({ msg: "Access denied: superadmin only" });
 
-    // Get all admins and their assigned issues
     const admins = await User.find({ role: "admin" });
     const assignments = [];
-
     for (const admin of admins) {
-      const adminComplaints = await Complaint.find({ issueType: admin.assignedIssueType });
+      const adminComplaints = await Complaint.find({ issueType: admin.assignedIssue });
       assignments.push({
         adminId: admin._id,
         email: admin.email,
-        assignedIssue: admin.assignedIssueType,
-        complaints: adminComplaints,
+        assignedIssue: admin.assignedIssue,
+        complaints: adminComplaints
       });
     }
 
