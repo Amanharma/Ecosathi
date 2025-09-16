@@ -19,7 +19,7 @@ export default function Header() {
     setIsMenuOpen(false); // Close mobile menu when navigating
     
     switch (item) {
-      case 'Home':
+      case 'home':
         // Refresh landing page
         if (window.location.pathname === '/') {
           window.location.reload();

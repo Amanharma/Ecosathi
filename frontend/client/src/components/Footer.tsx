@@ -15,14 +15,6 @@ export default function Footer() {
     setTimeout(() => setIsSubscribed(false), 3000);
   };
 
-  const handleLinkClick = (link: string) => {
-    console.log(`Footer link clicked: ${link}`);
-  };
-
-  const handleSocialClick = (social: string) => {
-    console.log(`Social link clicked: ${social}`);
-  };
-
   return (
     <footer className="bg-slate-900 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -70,17 +62,42 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Company</h4>
             <ul className="space-y-3">
-              {['About Us', 'Our Technology', 'Careers', 'Contact'].map((item) => (
-                <li key={item}>
-                  <button
-                    onClick={() => handleLinkClick(item)}
-                    className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
-                    data-testid={`footer-link-${item.toLowerCase().replace(' ', '-')}`}
-                  >
-                    {item}
-                  </button>
-                </li>
-              ))}
+              <li>
+                <a
+                  href="/about"
+                  className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
+                >
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a
+                  href="http://localhost:2002/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
+                >
+                  Main Admin Dashboard
+                </a>
+              </li>
+              <li>
+                <a
+                  href="http://localhost:5002/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
+                >
+                  Department Dashboard
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/contact"
+                  className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
+                >
+                  Contact
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -90,13 +107,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {['Help Center', 'Documentation', 'API Reference', 'Live Chat'].map((item) => (
                 <li key={item}>
-                  <button
-                    onClick={() => handleLinkClick(item)}
+                  <a
+                    href="#"
                     className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
-                    data-testid={`footer-link-${item.toLowerCase().replace(' ', '-')}`}
                   >
                     {item}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -108,13 +124,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Compliance'].map((item) => (
                 <li key={item}>
-                  <button
-                    onClick={() => handleLinkClick(item)}
+                  <a
+                    href="#"
                     className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
-                    data-testid={`footer-link-${item.toLowerCase().replace(' ', '-')}`}
                   >
                     {item}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -135,27 +150,30 @@ export default function Footer() {
             
             {/* Social icons */}
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => handleSocialClick('Twitter')}
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-cyan-300 hover:bg-slate-700 transition-all"
-                data-testid="social-twitter"
               >
                 <Twitter className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => handleSocialClick('LinkedIn')}
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-cyan-300 hover:bg-slate-700 transition-all"
-                data-testid="social-linkedin"
               >
                 <Linkedin className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => handleSocialClick('GitHub')}
+              </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-cyan-300 hover:bg-slate-700 transition-all"
-                data-testid="social-github"
               >
                 <Github className="w-5 h-5" />
-              </button>
+              </a>
             </div>
           </div>
         </div>
