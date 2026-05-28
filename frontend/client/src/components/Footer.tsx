@@ -72,9 +72,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="http://localhost:2002/"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/dashboard"
                   className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
                 >
                   Main Admin Dashboard
@@ -82,9 +80,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="http://localhost:5002/"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/dashboard"
                   className="text-gray-400 hover:text-cyan-300 transition-colors text-sm"
                 >
                   Department Dashboard
